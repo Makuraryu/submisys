@@ -107,12 +107,21 @@ const renderTable = (container, columns, rows, emptyMessage = '暂无数据') =>
 const initLogin = () => {
   const form = document.querySelector('#login-form');
   const result = document.querySelector('#login-result');
+  const passwordInput = document.querySelector('#login-password');
+  const toggleBtn = document.querySelector('#toggle-password');
   if (!form) return;
   const redirectMap = {
     student: '/student.html',
     teacher: '/teacher.html',
     admin: '/admin.html',
   };
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      toggleBtn.textContent = isPassword ? '隐藏' : '显示';
+    });
+  }
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     try {

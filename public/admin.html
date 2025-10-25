@@ -2,7 +2,7 @@
 <html lang="zh" class="h-full">
   <head>
     <meta charset="utf-8" />
-    <title>管理员端</title>
+    <title>数据库课程作业（答辩管理系统） - 管理员端</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="./js/main.js"></script>
   </head>
@@ -40,11 +40,18 @@
           </label>
           <label class="block space-y-1">
             <span class="text-sm text-slate-700">角色</span>
-            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="role">
-              <option value="student">学生</option>
-              <option value="teacher">教师</option>
-              <option value="admin">管理员</option>
-            </select>
+            <div class="relative">
+              <select class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="role">
+                <option value="student">学生</option>
+                <option value="teacher">教师</option>
+                <option value="admin">管理员</option>
+              </select>
+              <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                <svg class="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </div>
           </label>
           <div class="md:col-span-4 flex justify-end">
             <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
@@ -78,10 +85,17 @@
           </label>
           <label class="block space-y-1">
             <span class="text-sm text-slate-700">状态</span>
-            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
-              <option value="open">开放</option>
-              <option value="closed">关闭</option>
-            </select>
+            <div class="relative">
+              <select class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
+                <option value="open">开放</option>
+                <option value="closed">关闭</option>
+              </select>
+              <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                <svg class="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </div>
           </label>
           <div class="md:col-span-4 flex justify-end">
             <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
@@ -107,10 +121,17 @@
           </label>
           <label class="block space-y-1">
             <span class="text-sm text-slate-700">状态</span>
-            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
-              <option value="approved">通过</option>
-              <option value="rejected">拒绝</option>
-            </select>
+            <div class="relative">
+              <select class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
+                <option value="approved">通过</option>
+                <option value="rejected">拒绝</option>
+              </select>
+              <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                <svg class="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </div>
           </label>
           <div class="flex items-end md:justify-end">
             <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
