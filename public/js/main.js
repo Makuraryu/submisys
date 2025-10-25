@@ -25,6 +25,45 @@ const getCurrentUser = () => {
   }
 };
 
+const renderTable = (container, columns, rows, emptyMessage = '暂无数据') => {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    const empty = document.createElement('p');
+    empty.textContent = emptyMessage;
+    container.appendChild(empty);
+    return;
+  }
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  columns.forEach((column) => {
+    const th = document.createElement('th');
+    th.textContent = column.label;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  const tbody = document.createElement('tbody');
+  rows.forEach((row) => {
+    const tr = document.createElement('tr');
+    columns.forEach((column) => {
+      const td = document.createElement('td');
+      const rawValue =
+        typeof column.value === 'function'
+          ? column.value(row)
+          : column.key
+            ? row[column.key]
+            : '';
+      td.textContent = rawValue === undefined || rawValue === null ? '' : String(rawValue);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  container.appendChild(table);
+};
+
 const initLogin = () => {
   const form = document.querySelector('#login-form');
   const result = document.querySelector('#login-result');
@@ -70,7 +109,17 @@ const initStudent = () => {
     if (!slotList) return;
     try {
       const slots = await request('/api/defense/slots');
-      slotList.textContent = JSON.stringify(slots, null, 2);
+      renderTable(
+        slotList,
+        [
+          { label: 'ID', key: 'id' },
+          { label: '时间', value: (row) => row.slotTime },
+          { label: '地点', key: 'location' },
+          { label: '状态', key: 'status' },
+        ],
+        slots,
+        '暂无答辩时间'
+      );
     } catch (error) {
       slotList.textContent = error.message;
     }
@@ -167,7 +216,27 @@ const initTeacher = () => {
     if (!slotOutput) return;
     try {
       const slots = await request(`/api/teacher/slots/${teacherId}`);
-      slotOutput.textContent = JSON.stringify(slots, null, 2);
+      renderTable(
+        slotOutput,
+        [
+          { label: '答辩ID', key: 'slotId' },
+          { label: '时间', value: (row) => row.slotTime },
+          { label: '地点', key: 'location' },
+          { label: '状态', key: 'status' },
+          {
+            label: '项目',
+            value: (row) => {
+              if (!row.projects || row.projects.length === 0) return '暂无项目';
+              const titles = row.projects
+                .filter((project) => project.projectId)
+                .map((project) => `${project.projectTitle || '未命名'}(#${project.studentId})`);
+              return titles.length > 0 ? titles.join('、') : '暂无项目';
+            },
+          },
+        ],
+        slots,
+        '暂无答辩安排'
+      );
     } catch (error) {
       slotOutput.textContent = error.message;
     }
@@ -251,7 +320,19 @@ const initAdmin = () => {
     const loadSlots = async () => {
       try {
         const slots = await request('/api/admin/slots');
-        slotList.textContent = JSON.stringify(slots, null, 2);
+        renderTable(
+          slotList,
+          [
+            { label: 'ID', key: 'id' },
+            { label: '时间', value: (row) => row.slotTime },
+            { label: '地点', key: 'location' },
+            { label: '状态', key: 'status' },
+            { label: '教师数量', key: 'teacherCount' },
+            { label: '项目数量', key: 'projectCount' },
+          ],
+          slots,
+          '暂无答辩时间'
+        );
       } catch (error) {
         slotList.textContent = error.message;
       }
@@ -265,7 +346,24 @@ const initAdmin = () => {
     const loadProjects = async () => {
       try {
         const projects = await request('/api/admin/projects');
-        projectList.textContent = JSON.stringify(projects, null, 2);
+        renderTable(
+          projectList,
+          [
+            { label: '项目ID', key: 'id' },
+            {
+              label: '学生',
+              value: (row) => `${row.studentName ?? ''} (#${row.studentId})`,
+            },
+            { label: '标题', key: 'title' },
+            {
+              label: '答辩时间ID',
+              value: (row) => (row.defenseSlotId ? row.defenseSlotId : '未选择'),
+            },
+            { label: '状态', key: 'status' },
+          ],
+          projects,
+          '暂无学生提交'
+        );
       } catch (error) {
         projectList.textContent = error.message;
       }
