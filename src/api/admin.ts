@@ -156,10 +156,36 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
     }
   )
   .post(
+    '/projects/delete',
+    ({ body, set }) => {
+      const db = getDb();
+      try {
+        db.prepare('DELETE FROM scores WHERE project_id = ?').run(body.projectId);
+        const result = db.prepare('DELETE FROM projects WHERE id = ?').run(body.projectId);
+        if (result.changes === 0) {
+          set.status = 404;
+          return { message: 'Project not found' };
+        }
+        return { message: 'Project deleted' };
+      } catch (error) {
+        console.error('admin.projects.delete', error);
+        set.status = 500;
+        return { message: 'Failed to delete project' };
+      }
+    },
+    {
+      body: t.Object({
+        projectId: t.Number(),
+      }),
+    }
+  )
+  .post(
     '/slot/delete',
     ({ body, set }) => {
       const db = getDb();
       try {
+        db.prepare('DELETE FROM teacher_assignments WHERE slot_id = ?').run(body.id);
+        db.prepare('UPDATE projects SET defense_slot_id = NULL WHERE defense_slot_id = ?').run(body.id);
         const result = db.prepare('DELETE FROM defense_slots WHERE id = ?').run(body.id);
         if (result.changes === 0) {
           set.status = 404;

@@ -453,6 +453,19 @@ const initAdmin = () => {
   }
 
   if (projectListBtn && projectList) {
+    const handleDeleteProject = async (projectId) => {
+      try {
+        const response = await request('/api/admin/projects/delete', {
+          method: 'POST',
+          body: JSON.stringify({ projectId }),
+        });
+        approvalResult.textContent = withTimestamp(response.message);
+        refreshProjects();
+      } catch (error) {
+        approvalResult.textContent = withTimestamp(error.message);
+      }
+    };
+
     const loadProjects = async () => {
       try {
         const projects = await request('/api/admin/projects');
@@ -470,6 +483,17 @@ const initAdmin = () => {
               value: (row) => (row.defenseSlotId ? row.defenseSlotId : '未选择'),
             },
             { label: '状态', key: 'status' },
+            {
+              label: '操作',
+              render: (row) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = '删除';
+                btn.className = 'text-sm text-red-600 hover:text-red-800';
+                btn.addEventListener('click', () => handleDeleteProject(Number(row.id)));
+                return btn;
+              },
+            },
           ],
           projects,
           '暂无学生提交'

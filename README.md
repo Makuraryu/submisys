@@ -67,10 +67,11 @@ project-manager/
 管理员	新建/更新答辩时间	POST	/api/admin/slot/save	保存答辩时间并维护教师分配（ID 不存在则新建）
 管理员	删除答辩时间	POST	/api/admin/slot/delete	根据ID删除答辩时间
 管理员	查看答辩时间	GET	/api/admin/slots	列出全部答辩安排
-管理员	查看学生提交	GET	/api/admin/projects	查看所有项目记录
+管理员	查看学生提交	GET	/api/admin/projects	查看所有项目记录（含学生姓名）
 管理员	查看用户	GET	/api/admin/users	列出全部用户
 管理员	新增/更新用户	POST	/api/admin/users/save	根据ID保存用户（存在则更新）
 管理员	删除用户	POST	/api/admin/users/delete	根据ID删除用户
+管理员	删除项目	POST	/api/admin/projects/delete	根据ID删除项目（同时清理打分）
 
 
 ## 快速开始
@@ -81,4 +82,4 @@ project-manager/
 3. 启动开发服务器（同时提供 REST API 与静态页面）  
    `bun run dev`
 
-> 默认账号：`stu/stupass`、`tea/teapass`、`adm/admpass`（修改后请重新运行 `bun run src/db/initDB.ts` 以刷新种子数据）
+> 默认账号：`student1/stupass`、`teacher1/teapass`、`admin1/admpass`（修改后请重新运行 `bun run src/db/initDB.ts` 以刷新种子数据）

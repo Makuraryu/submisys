@@ -47,17 +47,17 @@ CREATE TABLE IF NOT EXISTS scores (
 );
 
 INSERT INTO users (id, username, password, role) VALUES
-  (1, 'stu', 'stupass', 'student'),
-  (2, 'tea', 'teapass', 'teacher'),
-  (3, 'adm', 'admpass', 'admin')
+  (1, 'student1', 'stupass', 'student'),
+  (2, 'teacher1', 'teapass', 'teacher'),
+  (3, 'admin1', 'admpass', 'admin')
 ON CONFLICT(id) DO UPDATE SET
   username = excluded.username,
   password = excluded.password,
   role = excluded.role;
 
 INSERT OR IGNORE INTO defense_slots (id, slot_time, location, status) VALUES
-  (1, '2024-07-01T09:00:00', 'Room 101', 'open'),
-  (2, '2024-07-01T10:30:00', 'Room 102', 'open');
+  (1, '2025-10-26T09:00:00', 'BJ303', 'open'),
+  (2, '2025-10-26T10:30:00', 'C503', 'open');
 
 INSERT OR IGNORE INTO teacher_assignments (teacher_id, slot_id) VALUES
   (2, 1),
