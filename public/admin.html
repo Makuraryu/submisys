@@ -6,9 +6,71 @@
     <script defer src="./js/main.js"></script>
   </head>
   <body data-role="admin">
-    <h1>管理员端</h1>
+    <header>
+      <h1>管理员端</h1>
+      <button id="logout-button">退出</button>
+    </header>
+    <p id="admin-info"></p>
     <section>
-      <h2>审批项目</h2>
+      <h2>用户管理</h2>
+      <form id="user-form">
+        <label>
+          用户ID
+          <input type="number" name="id" required />
+        </label>
+        <label>
+          用户名
+          <input type="text" name="username" required />
+        </label>
+        <label>
+          密码
+          <input type="text" name="password" required />
+        </label>
+        <label>
+          角色
+          <select name="role">
+            <option value="student">学生</option>
+            <option value="teacher">教师</option>
+            <option value="admin">管理员</option>
+          </select>
+        </label>
+        <button type="submit">保存</button>
+      </form>
+      <pre id="user-form-result"></pre>
+      <button id="load-users">刷新用户</button>
+      <div id="user-list" class="table-container"></div>
+    </section>
+    <section>
+      <h2>答辩时间管理</h2>
+      <form id="slot-form">
+        <label>
+          答辩ID（可选）
+          <input type="number" name="id" />
+        </label>
+        <label>
+          时间 (ISO)
+          <input type="text" name="slotTime" required />
+        </label>
+        <label>
+          地点
+          <input type="text" name="location" required />
+        </label>
+        <label>
+          状态
+          <select name="status">
+            <option value="open">开放</option>
+            <option value="closed">关闭</option>
+          </select>
+        </label>
+        <button type="submit">创建</button>
+      </form>
+      <pre id="slot-result"></pre>
+      <button id="load-admin-slots">刷新</button>
+      <div id="admin-slots" class="table-container"></div>
+    </section>
+
+    <section>
+      <h2>项目列表管理</h2>
       <form id="approval-form">
         <label>
           项目ID
@@ -24,34 +86,8 @@
         <button type="submit">更新</button>
       </form>
       <pre id="approval-result"></pre>
-    </section>
-
-    <section>
-      <h2>已有答辩时间</h2>
-      <button id="load-admin-slots">刷新</button>
-      <div id="admin-slots" class="table-container"></div>
-    </section>
-
-    <section>
-      <h2>学生提交记录</h2>
       <button id="load-projects">刷新</button>
       <div id="project-list" class="table-container"></div>
-    </section>
-
-    <section>
-      <h2>新建答辩时间</h2>
-      <form id="slot-form">
-        <label>
-          时间 (ISO)
-          <input type="text" name="slotTime" required />
-        </label>
-        <label>
-          地点
-          <input type="text" name="location" required />
-        </label>
-        <button type="submit">创建</button>
-      </form>
-      <pre id="slot-result"></pre>
     </section>
   </body>
 </html>

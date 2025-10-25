@@ -25,6 +25,33 @@ const getCurrentUser = () => {
   }
 };
 
+const redirectToLogin = () => {
+  window.location.href = '/index.html';
+};
+
+const requireRole = (role) => {
+  const user = getCurrentUser();
+  if (!user || user.role !== role) {
+    redirectToLogin();
+    return null;
+  }
+  return user;
+};
+
+const bindLogout = (button) => {
+  if (!button) return;
+  button.addEventListener('click', async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (error) {
+      console.warn('logout failed', error);
+    } finally {
+      localStorage.removeItem('currentUser');
+      redirectToLogin();
+    }
+  });
+};
+
 const renderTable = (container, columns, rows, emptyMessage = '暂无数据') => {
   if (!container) return;
   container.innerHTML = '';
@@ -99,8 +126,11 @@ const initStudent = () => {
   const result = document.querySelector('#project-result');
   const slotList = document.querySelector('#slot-list');
   const studentInfo = document.querySelector('#student-info');
-  const currentUser = getCurrentUser();
-  const studentId = currentUser?.role === 'student' ? Number(currentUser.id) : null;
+  const logoutBtn = document.querySelector('#logout-button');
+  bindLogout(logoutBtn);
+  const currentUser = requireRole('student');
+  if (!currentUser) return;
+  const studentId = Number(currentUser.id);
   const titleInput = form ? form.querySelector('input[name="title"]') : null;
   const descriptionInput = form ? form.querySelector('textarea[name="description"]') : null;
   const slotInput = form ? form.querySelector('input[name="defenseSlotId"]') : null;
@@ -139,7 +169,7 @@ const initStudent = () => {
   };
 
   const loadProject = async () => {
-    if (!form || !studentId) return;
+    if (!form) return;
     try {
       const { project } = await request(`/api/student/project/${studentId}`);
       applyProjectToForm(project);
@@ -149,19 +179,11 @@ const initStudent = () => {
   };
 
   if (form) {
-    if (!studentId) {
-      if (studentInfo) {
-        studentInfo.textContent = '请先登录学生账号后再访问本页面。';
-      }
-      form.querySelectorAll('input, textarea, button').forEach((el) => {
-        el.disabled = true;
-      });
-    } else if (studentInfo) {
+    if (studentInfo) {
       studentInfo.textContent = `当前学生ID：${studentId}`;
     }
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!studentId) return;
       const payload = formToJson(form);
       payload.studentId = studentId;
       payload.defenseSlotId = payload.defenseSlotId ? Number(payload.defenseSlotId) : undefined;
@@ -189,24 +211,12 @@ const initTeacher = () => {
   const scoreForm = document.querySelector('#score-form');
   const scoreResult = document.querySelector('#score-result');
   const teacherInfo = document.querySelector('#teacher-info');
+  const logoutBtn = document.querySelector('#logout-button');
+  bindLogout(logoutBtn);
 
-  const currentUser = getCurrentUser();
-  const teacherId = currentUser?.role === 'teacher' ? currentUser.id : null;
-
-  if (!teacherId) {
-    if (teacherInfo) {
-      teacherInfo.textContent = '请先使用教师账号登录后再访问本页面。';
-    }
-    if (refreshSlotsBtn) {
-      refreshSlotsBtn.disabled = true;
-    }
-    if (scoreForm) {
-      scoreForm.querySelectorAll('input, textarea, button, select').forEach((el) => {
-        el.disabled = true;
-      });
-    }
-    return;
-  }
+  const currentUser = requireRole('teacher');
+  if (!currentUser) return;
+  const teacherId = Number(currentUser.id);
 
   if (teacherInfo) {
     teacherInfo.textContent = `当前教师ID：${teacherId}`;
@@ -276,9 +286,24 @@ const initAdmin = () => {
   const slotList = document.querySelector('#admin-slots');
   const projectListBtn = document.querySelector('#load-projects');
   const projectList = document.querySelector('#project-list');
+  const adminInfo = document.querySelector('#admin-info');
+  const userForm = document.querySelector('#user-form');
+  const userFormResult = document.querySelector('#user-form-result');
+  const userList = document.querySelector('#user-list');
+  const userListBtn = document.querySelector('#load-users');
+  const logoutBtn = document.querySelector('#logout-button');
+  bindLogout(logoutBtn);
+
+  const currentUser = requireRole('admin');
+  if (!currentUser) return;
+
+  if (adminInfo) {
+    adminInfo.textContent = `当前管理员ID：${currentUser.id}`;
+  }
 
   let refreshSlots = () => {};
   let refreshProjects = () => {};
+  let refreshUsers = () => {};
 
   if (approvalForm) {
     approvalForm.addEventListener('submit', async (event) => {
@@ -302,8 +327,9 @@ const initAdmin = () => {
     slotForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const payload = formToJson(slotForm);
+      payload.id = payload.id ? Number(payload.id) : undefined;
       try {
-        const response = await request('/api/admin/slot/new', {
+        const response = await request('/api/admin/slot/save', {
           method: 'POST',
           body: JSON.stringify(payload),
         });
@@ -371,6 +397,51 @@ const initAdmin = () => {
     projectListBtn.addEventListener('click', loadProjects);
     refreshProjects = loadProjects;
     loadProjects();
+  }
+
+  if (userForm) {
+    userForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = formToJson(userForm);
+      payload.id = Number(payload.id);
+      try {
+        const response = await request('/api/admin/users/save', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (userFormResult) {
+          userFormResult.textContent = response.message;
+        }
+        refreshUsers();
+      } catch (error) {
+        if (userFormResult) {
+          userFormResult.textContent = error.message;
+        }
+      }
+    });
+  }
+
+  if (userListBtn && userList) {
+    const loadUsers = async () => {
+      try {
+        const users = await request('/api/admin/users');
+        renderTable(
+          userList,
+          [
+            { label: 'ID', key: 'id' },
+            { label: '用户名', key: 'username' },
+            { label: '角色', key: 'role' },
+          ],
+          users,
+          '暂无用户'
+        );
+      } catch (error) {
+        userList.textContent = error.message;
+      }
+    };
+    userListBtn.addEventListener('click', loadUsers);
+    refreshUsers = loadUsers;
+    loadUsers();
   }
 };
 

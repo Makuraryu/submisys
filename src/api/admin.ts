@@ -2,6 +2,53 @@ import { Elysia, t } from 'elysia';
 import { getDb } from '@/utils/dbClient';
 
 export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin' })
+  .get('/users', ({ set }) => {
+    const db = getDb();
+    try {
+      const users = db
+        .query(
+          `SELECT id, username, role
+           FROM users
+           ORDER BY id`
+        )
+        .all();
+      return users;
+    } catch (error) {
+      console.error('admin.users.list', error);
+      set.status = 500;
+      return { message: 'Failed to load users' };
+    }
+  })
+  .post(
+    '/users/save',
+    ({ body, set }) => {
+      const db = getDb();
+      try {
+        const statement = db.prepare(
+          `INSERT INTO users (id, username, password, role)
+           VALUES (?1, ?2, ?3, ?4)
+           ON CONFLICT(id) DO UPDATE SET
+             username = excluded.username,
+             password = excluded.password,
+             role = excluded.role`
+        );
+        statement.run(body.id, body.username, body.password, body.role);
+        return { message: 'User saved' };
+      } catch (error) {
+        console.error('admin.users.save', error);
+        set.status = 500;
+        return { message: 'Failed to save user' };
+      }
+    },
+    {
+      body: t.Object({
+        id: t.Number(),
+        username: t.String(),
+        password: t.String(),
+        role: t.Union([t.Literal('student'), t.Literal('teacher'), t.Literal('admin')]),
+      }),
+    }
+  )
   .get('/slots', ({ set }) => {
     const db = getDb();
     try {
@@ -76,21 +123,36 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
     }
   )
   .post(
-    '/slot/new',
+    '/slot/save',
     ({ body, set }) => {
       const db = getDb();
+      const status = body.status ?? 'open';
       try {
-        const statement = db.prepare('INSERT INTO defense_slots (slot_time, location, status) VALUES (?1, ?2, ?3)');
-        statement.run(body.slotTime, body.location, body.status ?? 'open');
+        if (body.id) {
+          const result = db
+            .prepare('UPDATE defense_slots SET slot_time = ?, location = ?, status = ? WHERE id = ?')
+            .run(body.slotTime, body.location, status, body.id);
+          if (result.changes === 0) {
+            set.status = 404;
+            return { message: 'Slot not found' };
+          }
+          return { message: 'Slot updated' };
+        }
+        db.prepare('INSERT INTO defense_slots (slot_time, location, status) VALUES (?1, ?2, ?3)').run(
+          body.slotTime,
+          body.location,
+          status
+        );
         return { message: 'Slot created' };
       } catch (error) {
-        console.error('admin.slot.new', error);
+        console.error('admin.slot.save', error);
         set.status = 500;
-        return { message: 'Failed to create slot' };
+        return { message: 'Failed to save slot' };
       }
     },
     {
       body: t.Object({
+        id: t.Optional(t.Number()),
         slotTime: t.String(),
         location: t.String(),
         status: t.Optional(t.String()),
