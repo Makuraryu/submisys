@@ -87,14 +87,20 @@ const renderTable = (container, columns, rows, emptyMessage = '暂无数据') =>
     tr.className = 'hover:bg-slate-50';
     columns.forEach((column) => {
       const td = document.createElement('td');
-      const rawValue =
-        typeof column.value === 'function'
-          ? column.value(row)
-          : column.key
-            ? row[column.key]
-            : '';
+      let rawValue = '';
+      if (typeof column.render === 'function') {
+        rawValue = column.render(row);
+      } else if (typeof column.value === 'function') {
+        rawValue = column.value(row);
+      } else if (column.key) {
+        rawValue = row[column.key];
+      }
       td.className = 'px-3 py-2 text-slate-700';
-      td.textContent = rawValue === undefined || rawValue === null ? '' : String(rawValue);
+      if (rawValue instanceof HTMLElement) {
+        td.appendChild(rawValue);
+      } else {
+        td.textContent = rawValue === undefined || rawValue === null ? '' : String(rawValue);
+      }
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -320,6 +326,7 @@ const initAdmin = () => {
   const userFormResult = document.querySelector('#user-form-result');
   const userList = document.querySelector('#user-list');
   const userListBtn = document.querySelector('#load-users');
+  const slotTeacherSelect = document.querySelector('#slot-teachers');
   const logoutBtn = document.querySelector('#logout-button');
   bindLogout(logoutBtn);
 
@@ -335,6 +342,23 @@ const initAdmin = () => {
   let refreshSlots = () => {};
   let refreshProjects = () => {};
   let refreshUsers = () => {};
+  let teacherOptions = [];
+
+  const populateTeacherSelect = () => {
+    if (!slotTeacherSelect) return;
+    slotTeacherSelect.innerHTML = '';
+    teacherOptions.forEach((teacher) => {
+      const option = document.createElement('option');
+      option.value = String(teacher.id);
+      option.textContent = `${teacher.username} (#${teacher.id})`;
+      slotTeacherSelect.appendChild(option);
+    });
+  };
+
+  const getSelectedTeacherIds = () => {
+    if (!slotTeacherSelect) return [];
+    return Array.from(slotTeacherSelect.selectedOptions).map((opt) => Number(opt.value));
+  };
 
   if (approvalForm) {
     approvalForm.addEventListener('submit', async (event) => {
@@ -359,6 +383,7 @@ const initAdmin = () => {
       event.preventDefault();
       const payload = formToJson(slotForm);
       payload.id = payload.id ? Number(payload.id) : undefined;
+      payload.teacherIds = getSelectedTeacherIds();
       try {
         const response = await request('/api/admin/slot/save', {
           method: 'POST',
@@ -374,6 +399,19 @@ const initAdmin = () => {
   }
 
   if (slotListBtn && slotList) {
+    const handleDeleteSlot = async (slotId) => {
+      try {
+        const response = await request('/api/admin/slot/delete', {
+          method: 'POST',
+          body: JSON.stringify({ id: slotId }),
+        });
+        slotResult.textContent = withTimestamp(response.message);
+        refreshSlots();
+      } catch (error) {
+        slotResult.textContent = withTimestamp(error.message);
+      }
+    };
+
     const loadSlots = async () => {
       try {
         const slots = await request('/api/admin/slots');
@@ -385,7 +423,22 @@ const initAdmin = () => {
             { label: '地点', key: 'location' },
             { label: '状态', key: 'status' },
             { label: '教师数量', key: 'teacherCount' },
+            {
+              label: '教师ID列表',
+              value: (row) => (row.teacherIds && row.teacherIds.length ? row.teacherIds.join(', ') : '无'),
+            },
             { label: '项目数量', key: 'projectCount' },
+            {
+              label: '操作',
+              render: (row) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = '删除';
+                btn.className = 'text-sm text-red-600 hover:text-red-800';
+                btn.addEventListener('click', () => handleDeleteSlot(Number(row.id)));
+                return btn;
+              },
+            },
           ],
           slots,
           '暂无答辩时间'
@@ -453,15 +506,45 @@ const initAdmin = () => {
   }
 
   if (userListBtn && userList) {
+    const handleDeleteUser = async (userId) => {
+      try {
+        const response = await request('/api/admin/users/delete', {
+          method: 'POST',
+          body: JSON.stringify({ id: userId }),
+        });
+        if (userFormResult) {
+          userFormResult.textContent = withTimestamp(response.message);
+        }
+        refreshUsers();
+      } catch (error) {
+        if (userFormResult) {
+          userFormResult.textContent = withTimestamp(error.message);
+        }
+      }
+    };
+
     const loadUsers = async () => {
       try {
         const users = await request('/api/admin/users');
+        teacherOptions = users.filter((user) => user.role === 'teacher');
+        populateTeacherSelect();
         renderTable(
           userList,
           [
             { label: 'ID', key: 'id' },
             { label: '用户名', key: 'username' },
             { label: '角色', key: 'role' },
+            {
+              label: '操作',
+              render: (row) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = '删除';
+                btn.className = 'text-sm text-red-600 hover:text-red-800';
+                btn.addEventListener('click', () => handleDeleteUser(Number(row.id)));
+                return btn;
+              },
+            },
           ],
           users,
           '暂无用户'

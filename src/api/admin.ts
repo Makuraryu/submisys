@@ -49,17 +49,41 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
       }),
     }
   )
+  .post(
+    '/users/delete',
+    ({ body, set }) => {
+      const db = getDb();
+      try {
+        const result = db.prepare('DELETE FROM users WHERE id = ?').run(body.id);
+        if (result.changes === 0) {
+          set.status = 404;
+          return { message: 'User not found' };
+        }
+        return { message: 'User deleted' };
+      } catch (error) {
+        console.error('admin.users.delete', error);
+        set.status = 500;
+        return { message: 'Failed to delete user' };
+      }
+    },
+    {
+      body: t.Object({
+        id: t.Number(),
+      }),
+    }
+  )
   .get('/slots', ({ set }) => {
     const db = getDb();
     try {
-      const slots = db
+      const rows = db
         .query(
           `SELECT ds.id,
                   ds.slot_time as slotTime,
                   ds.location,
                   ds.status,
                   COUNT(DISTINCT ta.teacher_id) as teacherCount,
-                  COUNT(DISTINCT p.id) as projectCount
+                  COUNT(DISTINCT p.id) as projectCount,
+                  GROUP_CONCAT(DISTINCT ta.teacher_id) as teacherIds
            FROM defense_slots ds
            LEFT JOIN teacher_assignments ta ON ta.slot_id = ds.id
            LEFT JOIN projects p ON p.defense_slot_id = ds.id
@@ -67,6 +91,15 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
            ORDER BY ds.slot_time`
         )
         .all();
+      const slots = rows.map((row) => ({
+        ...row,
+        teacherIds: row.teacherIds
+          ? String(row.teacherIds)
+              .split(',')
+              .filter(Boolean)
+              .map((id) => Number(id))
+          : [],
+      }));
       return slots;
     } catch (error) {
       console.error('admin.slots', error);
@@ -123,27 +156,62 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
     }
   )
   .post(
+    '/slot/delete',
+    ({ body, set }) => {
+      const db = getDb();
+      try {
+        const result = db.prepare('DELETE FROM defense_slots WHERE id = ?').run(body.id);
+        if (result.changes === 0) {
+          set.status = 404;
+          return { message: 'Slot not found' };
+        }
+        return { message: 'Slot deleted' };
+      } catch (error) {
+        console.error('admin.slot.delete', error);
+        set.status = 500;
+        return { message: 'Failed to delete slot' };
+      }
+    },
+    {
+      body: t.Object({
+        id: t.Number(),
+      }),
+    }
+  )
+  .post(
     '/slot/save',
     ({ body, set }) => {
       const db = getDb();
       const status = body.status ?? 'open';
+      const teacherIds = body.teacherIds ?? [];
       try {
-        if (body.id) {
+        let slotId = body.id;
+        if (slotId) {
           const result = db
             .prepare('UPDATE defense_slots SET slot_time = ?, location = ?, status = ? WHERE id = ?')
-            .run(body.slotTime, body.location, status, body.id);
+            .run(body.slotTime, body.location, status, slotId);
           if (result.changes === 0) {
-            set.status = 404;
-            return { message: 'Slot not found' };
+            const insertResult = db
+              .prepare('INSERT INTO defense_slots (id, slot_time, location, status) VALUES (?1, ?2, ?3, ?4)')
+              .run(slotId, body.slotTime, body.location, status);
+            slotId = Number(insertResult.lastInsertRowid ?? slotId);
           }
-          return { message: 'Slot updated' };
+        } else {
+          const insertResult = db
+            .prepare('INSERT INTO defense_slots (slot_time, location, status) VALUES (?1, ?2, ?3)')
+            .run(body.slotTime, body.location, status);
+          slotId = Number(insertResult.lastInsertRowid);
         }
-        db.prepare('INSERT INTO defense_slots (slot_time, location, status) VALUES (?1, ?2, ?3)').run(
-          body.slotTime,
-          body.location,
-          status
+
+        db.prepare('DELETE FROM teacher_assignments WHERE slot_id = ?').run(slotId);
+        const insertAssignment = db.prepare(
+          'INSERT INTO teacher_assignments (teacher_id, slot_id) VALUES (?1, ?2)'
         );
-        return { message: 'Slot created' };
+        teacherIds.forEach((teacherId: number) => {
+          insertAssignment.run(teacherId, slotId);
+        });
+
+        return { message: body.id ? 'Slot updated' : 'Slot created' };
       } catch (error) {
         console.error('admin.slot.save', error);
         set.status = 500;
@@ -156,6 +224,7 @@ export const adminRoutes = new Elysia({ name: 'adminRoutes', prefix: '/api/admin
         slotTime: t.String(),
         location: t.String(),
         status: t.Optional(t.String()),
+        teacherIds: t.Optional(t.Array(t.Number())),
       }),
     }
   );

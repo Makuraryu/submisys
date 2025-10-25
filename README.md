@@ -8,7 +8,7 @@
 该系统采用前后端分离的轻量架构：
 	•	后端： 使用 Elysia.js（Bun 原生 Web 框架）构建 REST API
 	•	数据库： SQLite，本地文件形式，无需服务端依赖
-	•	前端： 纯 HTML + 原生 JS，无任何框架或样式库
+	•	前端： 纯 HTML + 原生 JS，配合 TailwindCSS CDN 进行快速美化
 	•	运行方式： Bun 启动单一 Elysia 服务器，负责同时：
 		1.	提供 REST API（如 /api/student/submit）
 		2.	提供静态页面（如 /student.html）
@@ -63,11 +63,13 @@ project-manager/
 教师	查看自己负责答辩	GET	/api/teacher/slots/:id	教师ID筛选
 教师	提交评分	POST	/api/teacher/score	通过/不通过
 管理员	审批预约	POST	/api/admin/approve	修改状态
-管理员	新建/更新答辩时间	POST	/api/admin/slot/save	按 ID 保存答辩时间（无 ID 则新建）
+管理员	新建/更新答辩时间	POST	/api/admin/slot/save	保存答辩时间并维护教师分配（ID 不存在则新建）
+管理员	删除答辩时间	POST	/api/admin/slot/delete	根据ID删除答辩时间
 管理员	查看答辩时间	GET	/api/admin/slots	列出全部答辩安排
 管理员	查看学生提交	GET	/api/admin/projects	查看所有项目记录
 管理员	查看用户	GET	/api/admin/users	列出全部用户
 管理员	新增/更新用户	POST	/api/admin/users/save	根据ID保存用户（存在则更新）
+管理员	删除用户	POST	/api/admin/users/delete	根据ID删除用户
 
 
 ## 快速开始
