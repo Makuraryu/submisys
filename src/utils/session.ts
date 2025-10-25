@@ -7,6 +7,7 @@ const SESSION_COOKIE_MAX_AGE = Math.floor(SESSION_TTL_MS / 1000);
 type SessionRecord = {
   sessionId: string;
   userId: number;
+  username: string;
   role: string;
   expiresAt: number;
 };
@@ -22,12 +23,13 @@ const cleanupExpired = () => {
   }
 };
 
-export const createSession = (userId: number, role: string) => {
+export const createSession = (userId: number, role: string, username: string) => {
   cleanupExpired();
   const sessionId = randomUUID();
   sessions.set(sessionId, {
     sessionId,
     userId,
+    username,
     role,
     expiresAt: Date.now() + SESSION_TTL_MS,
   });

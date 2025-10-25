@@ -55,6 +55,16 @@ export const teacherRoutes = new Elysia({ name: 'teacherRoutes', prefix: '/api/t
     ({ body, set }) => {
       const db = getDb();
       try {
+        const project = db
+          .query(
+            `SELECT id FROM projects WHERE student_id = ? AND defense_slot_id IS NOT NULL LIMIT 1`
+          )
+          .get(body.studentId) as { id: number } | undefined;
+        if (!project) {
+          set.status = 404;
+          return { message: 'Project for student not found' };
+        }
+
         const statement = db.prepare(`
           INSERT INTO scores (project_id, teacher_id, result, comments)
           VALUES (?1, ?2, ?3, ?4)
@@ -64,12 +74,12 @@ export const teacherRoutes = new Elysia({ name: 'teacherRoutes', prefix: '/api/t
             comments = excluded.comments,
             updated_at = CURRENT_TIMESTAMP
         `);
-        statement.run(body.projectId, body.teacherId, body.result, body.comments ?? null);
+        statement.run(project.id, body.teacherId, body.result, body.comments ?? null);
 
         const updateProject = db.prepare(`
           UPDATE projects SET status = ? WHERE id = ?
         `);
-        updateProject.run(body.result === 'pass' ? 'approved' : 'rejected', body.projectId);
+        updateProject.run(body.result === 'pass' ? 'approved' : 'rejected', project.id);
 
         return { message: 'Score saved' };
       } catch (error) {
@@ -81,7 +91,7 @@ export const teacherRoutes = new Elysia({ name: 'teacherRoutes', prefix: '/api/t
     {
       body: t.Object({
         teacherId: t.Number(),
-        projectId: t.Number(),
+        studentId: t.Number(),
         result: t.Union([t.Literal('pass'), t.Literal('fail')]),
         comments: t.Optional(t.String()),
       }),

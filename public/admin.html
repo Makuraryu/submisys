@@ -1,93 +1,126 @@
 <!doctype html>
-<html lang="zh">
+<html lang="zh" class="h-full">
   <head>
     <meta charset="utf-8" />
     <title>管理员端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="./js/main.js"></script>
   </head>
-  <body data-role="admin">
-    <header>
-      <h1>管理员端</h1>
-      <button id="logout-button">退出</button>
-    </header>
-    <p id="admin-info"></p>
-    <section>
-      <h2>用户管理</h2>
-      <form id="user-form">
-        <label>
-          用户ID
-          <input type="number" name="id" required />
-        </label>
-        <label>
-          用户名
-          <input type="text" name="username" required />
-        </label>
-        <label>
-          密码
-          <input type="text" name="password" required />
-        </label>
-        <label>
-          角色
-          <select name="role">
-            <option value="student">学生</option>
-            <option value="teacher">教师</option>
-            <option value="admin">管理员</option>
-          </select>
-        </label>
-        <button type="submit">保存</button>
-      </form>
-      <pre id="user-form-result"></pre>
-      <button id="load-users">刷新用户</button>
-      <div id="user-list" class="table-container"></div>
-    </section>
-    <section>
-      <h2>答辩时间管理</h2>
-      <form id="slot-form">
-        <label>
-          答辩ID（可选）
-          <input type="number" name="id" />
-        </label>
-        <label>
-          时间 (ISO)
-          <input type="text" name="slotTime" required />
-        </label>
-        <label>
-          地点
-          <input type="text" name="location" required />
-        </label>
-        <label>
-          状态
-          <select name="status">
-            <option value="open">开放</option>
-            <option value="closed">关闭</option>
-          </select>
-        </label>
-        <button type="submit">创建</button>
-      </form>
-      <pre id="slot-result"></pre>
-      <button id="load-admin-slots">刷新</button>
-      <div id="admin-slots" class="table-container"></div>
-    </section>
+  <body data-role="admin" class="min-h-full bg-slate-50">
+    <div class="max-w-6xl mx-auto py-10 px-4 space-y-8">
+      <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h1 class="text-2xl font-semibold text-slate-900">管理员端</h1>
+          <p id="admin-info" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <button id="logout-button" class="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+          退出
+        </button>
+      </header>
 
-    <section>
-      <h2>项目列表管理</h2>
-      <form id="approval-form">
-        <label>
-          项目ID
-          <input type="number" name="projectId" required />
-        </label>
-        <label>
-          状态
-          <select name="status">
-            <option value="approved">通过</option>
-            <option value="rejected">拒绝</option>
-          </select>
-        </label>
-        <button type="submit">更新</button>
-      </form>
-      <pre id="approval-result"></pre>
-      <button id="load-projects">刷新</button>
-      <div id="project-list" class="table-container"></div>
-    </section>
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-slate-900">用户管理</h2>
+          <button id="load-users" class="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100">
+            刷新
+          </button>
+        </div>
+        <form id="user-form" class="grid gap-4 md:grid-cols-4">
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">用户ID</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="number" name="id" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">用户名</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="text" name="username" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">密码</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="text" name="password" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">角色</span>
+            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="role">
+              <option value="student">学生</option>
+              <option value="teacher">教师</option>
+              <option value="admin">管理员</option>
+            </select>
+          </label>
+          <div class="md:col-span-4 flex justify-end">
+            <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
+              保存
+            </button>
+          </div>
+        </form>
+        <pre id="user-form-result" class="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 min-h-[48px]"></pre>
+        <div id="user-list" class="table-container"></div>
+      </section>
+
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-slate-900">答辩时间管理</h2>
+          <button id="load-admin-slots" class="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100">
+            刷新
+          </button>
+        </div>
+        <form id="slot-form" class="grid gap-4 md:grid-cols-4">
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">答辩ID（可选）</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="number" name="id" />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">时间 (ISO)</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="text" name="slotTime" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">地点</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="text" name="location" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">状态</span>
+            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
+              <option value="open">开放</option>
+              <option value="closed">关闭</option>
+            </select>
+          </label>
+          <div class="md:col-span-4 flex justify-end">
+            <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
+              保存
+            </button>
+          </div>
+        </form>
+        <pre id="slot-result" class="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 min-h-[48px]"></pre>
+        <div id="admin-slots" class="table-container"></div>
+      </section>
+
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-slate-900">项目列表管理</h2>
+          <button id="load-projects" class="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100">
+            刷新
+          </button>
+        </div>
+        <form id="approval-form" class="grid gap-4 md:grid-cols-3">
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">项目ID</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="number" name="projectId" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">状态</span>
+            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="status">
+              <option value="approved">通过</option>
+              <option value="rejected">拒绝</option>
+            </select>
+          </label>
+          <div class="flex items-end md:justify-end">
+            <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
+              更新
+            </button>
+          </div>
+        </form>
+        <pre id="approval-result" class="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 min-h-[48px]"></pre>
+        <div id="project-list" class="table-container"></div>
+      </section>
+    </div>
   </body>
 </html>

@@ -1,39 +1,56 @@
 <!doctype html>
-<html lang="zh">
+<html lang="zh" class="h-full">
   <head>
     <meta charset="utf-8" />
     <title>学生端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="./js/main.js"></script>
   </head>
-  <body data-role="student">
-    <header>
-      <h1>学生端</h1>
-      <button id="logout-button">退出</button>
-    </header>
-    <section>
-      <h2>提交项目信息</h2>
-      <p id="student-info"></p>
-      <form id="project-form">
-        <label>
-          项目标题
-          <input type="text" name="title" required />
-        </label>
-        <label>
-          项目描述
-          <textarea name="description"></textarea>
-        </label>
-        <label>
-          答辩时间ID
-          <input type="number" name="defenseSlotId" />
-        </label>
-        <button type="submit">提交</button>
-      </form>
-      <pre id="project-result"></pre>
-    </section>
+  <body data-role="student" class="min-h-full bg-slate-50">
+    <div class="max-w-5xl mx-auto py-10 px-4 space-y-8">
+      <header class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h1 class="text-2xl font-semibold text-slate-900">学生端</h1>
+          <p id="student-info" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <button id="logout-button" class="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+          退出
+        </button>
+      </header>
 
-    <section>
-      <h2>答辩时间</h2>
-      <div id="slot-list" class="table-container"></div>
-    </section>
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <h2 class="text-lg font-medium text-slate-900">提交项目信息</h2>
+        <form id="project-form" class="grid gap-4 md:grid-cols-2">
+          <label class="block space-y-1 md:col-span-2">
+            <span class="text-sm text-slate-700">项目标题</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="text" name="title" required />
+          </label>
+          <label class="block space-y-1 md:col-span-2">
+            <span class="text-sm text-slate-700">项目描述</span>
+            <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[96px]" name="description"></textarea>
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">答辩时间ID</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="number" name="defenseSlotId" />
+          </label>
+          <div class="flex items-end md:justify-end">
+            <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
+              提交
+            </button>
+          </div>
+        </form>
+        <pre id="project-result" class="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 min-h-[48px]"></pre>
+      </section>
+
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-slate-900">答辩时间</h2>
+          <button class="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100" id="load-slots">
+            刷新
+          </button>
+        </div>
+        <div id="slot-list" class="table-container text-sm text-slate-700"></div>
+      </section>
+    </div>
   </body>
 </html>

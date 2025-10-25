@@ -6,6 +6,7 @@ const formToJson = (form) => {
 const request = async (url, options = {}) => {
   const response = await fetch(url, {
     headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+    credentials: 'include',
     ...options,
   });
   const payload = await response.json().catch(() => ({}));
@@ -23,6 +24,11 @@ const getCurrentUser = () => {
     console.warn('Failed to parse currentUser', error);
     return null;
   }
+};
+
+const withTimestamp = (message) => {
+  const stamp = new Date().toLocaleString();
+  return message ? `${message} (${stamp})` : `(${stamp})`;
 };
 
 const redirectToLogin = () => {
@@ -57,22 +63,28 @@ const renderTable = (container, columns, rows, emptyMessage = '暂无数据') =>
   container.innerHTML = '';
   if (!rows || rows.length === 0) {
     const empty = document.createElement('p');
+    empty.className = 'text-sm text-slate-500';
     empty.textContent = emptyMessage;
     container.appendChild(empty);
     return;
   }
   const table = document.createElement('table');
+  table.className = 'w-full border border-slate-200 rounded-lg overflow-hidden text-sm';
   const thead = document.createElement('thead');
+  thead.className = 'bg-slate-100 text-left text-slate-600';
   const headRow = document.createElement('tr');
   columns.forEach((column) => {
     const th = document.createElement('th');
+    th.className = 'px-3 py-2 font-medium';
     th.textContent = column.label;
     headRow.appendChild(th);
   });
   thead.appendChild(headRow);
   const tbody = document.createElement('tbody');
+  tbody.className = 'divide-y divide-slate-100';
   rows.forEach((row) => {
     const tr = document.createElement('tr');
+    tr.className = 'hover:bg-slate-50';
     columns.forEach((column) => {
       const td = document.createElement('td');
       const rawValue =
@@ -81,6 +93,7 @@ const renderTable = (container, columns, rows, emptyMessage = '暂无数据') =>
           : column.key
             ? row[column.key]
             : '';
+      td.className = 'px-3 py-2 text-slate-700';
       td.textContent = rawValue === undefined || rawValue === null ? '' : String(rawValue);
       tr.appendChild(td);
     });
@@ -114,9 +127,9 @@ const initLogin = () => {
         window.location.href = target;
         return;
       }
-      result.textContent = JSON.stringify(response, null, 2);
+      result.textContent = withTimestamp(JSON.stringify(response, null, 2));
     } catch (error) {
-      result.textContent = error.message;
+      result.textContent = withTimestamp(error.message);
     }
   });
 };
@@ -131,6 +144,7 @@ const initStudent = () => {
   const currentUser = requireRole('student');
   if (!currentUser) return;
   const studentId = Number(currentUser.id);
+  const studentName = currentUser.username ?? '';
   const titleInput = form ? form.querySelector('input[name="title"]') : null;
   const descriptionInput = form ? form.querySelector('textarea[name="description"]') : null;
   const slotInput = form ? form.querySelector('input[name="defenseSlotId"]') : null;
@@ -151,7 +165,7 @@ const initStudent = () => {
         '暂无答辩时间'
       );
     } catch (error) {
-      slotList.textContent = error.message;
+      slotList.textContent = withTimestamp(error.message);
     }
   };
 
@@ -180,7 +194,11 @@ const initStudent = () => {
 
   if (form) {
     if (studentInfo) {
-      studentInfo.textContent = `当前学生ID：${studentId}`;
+      if (studentName) {
+        studentInfo.textContent = `当前学生用户：${studentName}`;
+      } else {
+        studentInfo.textContent = `当前学生ID：${studentId}`;
+      }
     }
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -192,11 +210,11 @@ const initStudent = () => {
           method: 'POST',
           body: JSON.stringify(payload),
         });
-        result.textContent = response.message;
+        result.textContent = withTimestamp(response.message);
         await loadSlots();
         await loadProject();
       } catch (error) {
-        result.textContent = error.message;
+        result.textContent = withTimestamp(error.message);
       }
     });
   }
@@ -218,8 +236,10 @@ const initTeacher = () => {
   if (!currentUser) return;
   const teacherId = Number(currentUser.id);
 
+  const teacherName = currentUser.username ?? '';
+
   if (teacherInfo) {
-    teacherInfo.textContent = `当前教师ID：${teacherId}`;
+    teacherInfo.textContent = teacherName ? `当前教师用户：${teacherName}` : `当前教师ID：${teacherId}`;
   }
 
   const loadSlots = async () => {
@@ -234,7 +254,7 @@ const initTeacher = () => {
           { label: '地点', key: 'location' },
           { label: '状态', key: 'status' },
           {
-            label: '项目',
+            label: '项目(学生ID)',
             value: (row) => {
               if (!row.projects || row.projects.length === 0) return '暂无项目';
               const titles = row.projects
@@ -248,7 +268,7 @@ const initTeacher = () => {
         '暂无答辩安排'
       );
     } catch (error) {
-      slotOutput.textContent = error.message;
+      slotOutput.textContent = withTimestamp(error.message);
     }
   };
 
@@ -262,16 +282,16 @@ const initTeacher = () => {
       event.preventDefault();
       const payload = formToJson(scoreForm);
       payload.teacherId = teacherId;
-      payload.projectId = Number(payload.projectId);
+      payload.studentId = Number(payload.studentId);
       try {
         const response = await request('/api/teacher/score', {
           method: 'POST',
           body: JSON.stringify(payload),
         });
-        scoreResult.textContent = response.message;
+        scoreResult.textContent = withTimestamp(response.message);
         await loadSlots();
       } catch (error) {
-        scoreResult.textContent = error.message;
+        scoreResult.textContent = withTimestamp(error.message);
       }
     });
   }
@@ -297,8 +317,10 @@ const initAdmin = () => {
   const currentUser = requireRole('admin');
   if (!currentUser) return;
 
+  const adminName = currentUser.username ?? '';
+
   if (adminInfo) {
-    adminInfo.textContent = `当前管理员ID：${currentUser.id}`;
+    adminInfo.textContent = adminName ? `当前管理员用户：${adminName}` : `当前管理员ID：${currentUser.id}`;
   }
 
   let refreshSlots = () => {};
@@ -315,10 +337,10 @@ const initAdmin = () => {
           method: 'POST',
           body: JSON.stringify(payload),
         });
-        approvalResult.textContent = response.message;
+        approvalResult.textContent = withTimestamp(response.message);
         refreshProjects();
       } catch (error) {
-        approvalResult.textContent = error.message;
+        approvalResult.textContent = withTimestamp(error.message);
       }
     });
   }
@@ -333,11 +355,11 @@ const initAdmin = () => {
           method: 'POST',
           body: JSON.stringify(payload),
         });
-        slotResult.textContent = response.message;
+        slotResult.textContent = withTimestamp(response.message);
         slotForm.reset();
         refreshSlots();
       } catch (error) {
-        slotResult.textContent = error.message;
+        slotResult.textContent = withTimestamp(error.message);
       }
     });
   }
@@ -360,7 +382,7 @@ const initAdmin = () => {
           '暂无答辩时间'
         );
       } catch (error) {
-        slotList.textContent = error.message;
+        slotList.textContent = withTimestamp(error.message);
       }
     };
     slotListBtn.addEventListener('click', loadSlots);
@@ -391,7 +413,7 @@ const initAdmin = () => {
           '暂无学生提交'
         );
       } catch (error) {
-        projectList.textContent = error.message;
+        projectList.textContent = withTimestamp(error.message);
       }
     };
     projectListBtn.addEventListener('click', loadProjects);
@@ -410,12 +432,12 @@ const initAdmin = () => {
           body: JSON.stringify(payload),
         });
         if (userFormResult) {
-          userFormResult.textContent = response.message;
+          userFormResult.textContent = withTimestamp(response.message);
         }
         refreshUsers();
       } catch (error) {
         if (userFormResult) {
-          userFormResult.textContent = error.message;
+          userFormResult.textContent = withTimestamp(error.message);
         }
       }
     });
@@ -436,7 +458,7 @@ const initAdmin = () => {
           '暂无用户'
         );
       } catch (error) {
-        userList.textContent = error.message;
+        userList.textContent = withTimestamp(error.message);
       }
     };
     userListBtn.addEventListener('click', loadUsers);

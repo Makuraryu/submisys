@@ -1,43 +1,59 @@
 <!doctype html>
-<html lang="zh">
+<html lang="zh" class="h-full">
   <head>
     <meta charset="utf-8" />
     <title>教师端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="./js/main.js"></script>
   </head>
-  <body data-role="teacher">
-    <header>
-      <h1>教师端</h1>
-      <button id="logout-button">退出</button>
-    </header>
-    <section>
-      <h2>查看答辩安排</h2>
-      <p id="teacher-info"></p>
-      <button id="refresh-teacher-slots">刷新答辩安排</button>
-      <div id="teacher-slots" class="table-container"></div>
-    </section>
+  <body data-role="teacher" class="min-h-full bg-slate-50">
+    <div class="max-w-5xl mx-auto py-10 px-4 space-y-8">
+      <header class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h1 class="text-2xl font-semibold text-slate-900">教师端</h1>
+          <p id="teacher-info" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <button id="logout-button" class="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+          退出
+        </button>
+      </header>
 
-    <section>
-      <h2>提交评分</h2>
-      <form id="score-form">
-        <label>
-          项目ID
-          <input type="number" name="projectId" required />
-        </label>
-        <label>
-          结果
-          <select name="result">
-            <option value="pass">通过</option>
-            <option value="fail">未通过</option>
-          </select>
-        </label>
-        <label>
-          评语
-          <textarea name="comments"></textarea>
-        </label>
-        <button type="submit">提交评分</button>
-      </form>
-      <pre id="score-result"></pre>
-    </section>
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-slate-900">答辩安排</h2>
+          <button id="refresh-teacher-slots" class="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100">
+            刷新
+          </button>
+        </div>
+        <div id="teacher-slots" class="table-container"></div>
+      </section>
+
+      <section class="bg-white shadow rounded-lg p-6 space-y-4">
+        <h2 class="text-lg font-medium text-slate-900">提交评分</h2>
+        <form id="score-form" class="grid gap-4 md:grid-cols-2">
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">学生ID</span>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" type="number" name="studentId" required />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-sm text-slate-700">结果</span>
+            <select class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" name="result">
+              <option value="pass">通过</option>
+              <option value="fail">未通过</option>
+            </select>
+          </label>
+          <label class="block space-y-1 md:col-span-2">
+            <span class="text-sm text-slate-700">评语</span>
+            <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[96px]" name="comments"></textarea>
+          </label>
+          <div class="flex items-end md:justify-end">
+            <button class="rounded-lg bg-blue-600 text-white px-4 py-2 font-medium hover:bg-blue-700 transition" type="submit">
+              提交评分
+            </button>
+          </div>
+        </form>
+        <pre id="score-result" class="text-sm text-slate-500 bg-slate-50 rounded-lg p-3 min-h-[48px]"></pre>
+      </section>
+    </div>
   </body>
 </html>

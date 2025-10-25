@@ -14,16 +14,16 @@ export const authRoutes = new Elysia({ name: 'authRoutes', prefix: '/api' })
       const db = getDb();
       try {
         const statement = db.prepare(
-          `SELECT id, role FROM users WHERE username = ?1 AND password = ?2 LIMIT 1`
+          `SELECT id, username, role FROM users WHERE username = ?1 AND password = ?2 LIMIT 1`
         );
         const user = statement.get(body.username, body.password) as
-          | { id: number; role: string }
+          | { id: number; role: string; username: string }
           | undefined;
         if (!user) {
           set.status = 401;
           return { message: 'Invalid credentials' };
         }
-        const sessionId = createSession(user.id, user.role);
+        const sessionId = createSession(user.id, user.role, user.username);
         set.headers = set.headers ?? {};
         set.headers['Set-Cookie'] = buildSessionCookie(sessionId);
         return user;
