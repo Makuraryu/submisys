@@ -10,8 +10,13 @@
 	•	数据库： SQLite，本地文件形式，无需服务端依赖
 	•	前端： 纯 HTML + 原生 JS，无任何框架或样式库
 	•	运行方式： Bun 启动单一 Elysia 服务器，负责同时：
-	1.	提供 REST API（如 /api/student/submit）
-	2.	提供静态页面（如 /student.html）
+		1.	提供 REST API（如 /api/student/submit）
+		2.	提供静态页面（如 /student.html）
+	•	登录校验系统： 基于角色的简单登录验证（学生/教师/管理员）
+		1.	用户登录成功后，服务器生成一个 Session ID（或 JWT）；
+		2.	服务器将其写入一个 HTTP-only Cookie；
+		3.	每次访问 /student.html、/teacher.html、/admin.html 时，服务器端判断该 Cookie 是否有效；
+		4.	无效则重定向到 /index.html。
 
 ## 项目结构设计
 
@@ -44,6 +49,7 @@ project-manager/
 [x] 开发服务器和提供的API接口
 [x] 编写前端页面，包括登录页面、学生页面、教师页面、管理员页面，纯HTML+JS，无样式（暂时）
 [x] 用服务器启动前端页面，提供路由
+[ ] 编写登录校验系统
 
 ## 接口约定
 
