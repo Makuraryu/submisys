@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <title>管理员端</title>
+    <script defer src="./js/main.js"></script>
+  </head>
+  <body data-role="admin">
+    <h1>管理员端</h1>
+    <section>
+      <h2>审批项目</h2>
+      <form id="approval-form">
+        <label>
+          项目ID
+          <input type="number" name="projectId" required />
+        </label>
+        <label>
+          状态
+          <select name="status">
+            <option value="approved">通过</option>
+            <option value="rejected">拒绝</option>
+          </select>
+        </label>
+        <button type="submit">更新</button>
+      </form>
+      <pre id="approval-result"></pre>
+    </section>
+
+    <section>
+      <h2>已有答辩时间</h2>
+      <button id="load-admin-slots">刷新</button>
+      <pre id="admin-slots"></pre>
+    </section>
+
+    <section>
+      <h2>学生提交记录</h2>
+      <button id="load-projects">刷新</button>
+      <pre id="project-list"></pre>
+    </section>
+
+    <section>
+      <h2>新建答辩时间</h2>
+      <form id="slot-form">
+        <label>
+          时间 (ISO)
+          <input type="text" name="slotTime" required />
+        </label>
+        <label>
+          地点
+          <input type="text" name="location" required />
+        </label>
+        <button type="submit">创建</button>
+      </form>
+      <pre id="slot-result"></pre>
+    </section>
+  </body>
+</html>

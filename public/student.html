@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <title>学生端</title>
+    <script defer src="./js/main.js"></script>
+  </head>
+  <body data-role="student">
+    <h1>学生端</h1>
+    <section>
+      <h2>提交项目信息</h2>
+      <p id="student-info"></p>
+      <form id="project-form">
+        <label>
+          项目标题
+          <input type="text" name="title" required />
+        </label>
+        <label>
+          项目描述
+          <textarea name="description"></textarea>
+        </label>
+        <label>
+          答辩时间ID
+          <input type="number" name="defenseSlotId" />
+        </label>
+        <button type="submit">提交</button>
+      </form>
+      <pre id="project-result"></pre>
+    </section>
+
+    <section>
+      <h2>答辩时间</h2>
+      <pre id="slot-list"></pre>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "project-manager",
+  "version": "0.1.0",
+  "description": "Course project submission and defense management system",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/server.ts",
+    "start": "bun run src/server.ts",
+    "db:init": "bun run src/db/initDB.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@elysiajs/static": "^1.0.0",
+    "elysia": "^1.0.22"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.6"
+  }
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <title>教师端</title>
+    <script defer src="./js/main.js"></script>
+  </head>
+  <body data-role="teacher">
+    <h1>教师端</h1>
+    <section>
+      <h2>查看答辩安排</h2>
+      <p id="teacher-info"></p>
+      <button id="refresh-teacher-slots">刷新答辩安排</button>
+      <pre id="teacher-slots"></pre>
+    </section>
+
+    <section>
+      <h2>提交评分</h2>
+      <form id="score-form">
+        <label>
+          项目ID
+          <input type="number" name="projectId" required />
+        </label>
+        <label>
+          结果
+          <select name="result">
+            <option value="pass">通过</option>
+            <option value="fail">未通过</option>
+          </select>
+        </label>
+        <label>
+          评语
+          <textarea name="comments"></textarea>
+        </label>
+        <button type="submit">提交评分</button>
+      </form>
+      <pre id="score-result"></pre>
+    </section>
+  </body>
+</html>

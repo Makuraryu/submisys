@@ -1,6 +1,6 @@
 # README
 
-项目名称： 课程项目提交与答辩管理系统
+项目名称： 课程项目提交与答辩管理系统  
 技术栈： Bun + Elysia.js + SQLite + Pure HTML/JS + REST API
 
 ## 总体架构
@@ -39,12 +39,11 @@ project-manager/
 └── README.md
 
 ## RoadMap
-[ ] 建立数据库initDB.ts
-[ ] 编写后端交互功能
-[ ] 开发服务器和提供的API接口
-[ ] 编写前端页面，包括登录页面、学生页面、教师页面、管理员页面，纯HTML+JS，无样式（暂时）
-[ ] 用服务器启动前端页面，提供路由
-[ ] 使用 TailwindCSS 优化前端页面
+[x] 建立数据库initDB.ts
+[x] 编写后端交互功能
+[x] 开发服务器和提供的API接口
+[x] 编写前端页面，包括登录页面、学生页面、教师页面、管理员页面，纯HTML+JS，无样式（暂时）
+[x] 用服务器启动前端页面，提供路由
 
 ## 接口约定
 
@@ -52,14 +51,21 @@ project-manager/
 所有	登录	POST	/api/login	返回角色与ID
 学生	提交项目	POST	/api/student/submit	更新项目信息
 学生	查看答辩时间	GET	/api/defense/slots	列出时间段
+学生	查看已提交项目	GET	/api/student/project/:id	根据学生ID获取项目详情
 教师	查看自己负责答辩	GET	/api/teacher/slots/:id	教师ID筛选
 教师	提交评分	POST	/api/teacher/score	通过/不通过
 管理员	审批预约	POST	/api/admin/approve	修改状态
 管理员	新建答辩时间	POST	/api/admin/slot/new	新增时间段
+管理员	查看答辩时间	GET	/api/admin/slots	列出全部答辩安排
+管理员	查看学生提交	GET	/api/admin/projects	查看所有项目记录
 
 
-## 运行
-	1.	初始化数据库
-		bun run src/db/initDB.ts
-	2.	启动服务器
-		bun run dev
+## 快速开始
+1. 安装依赖  
+   `bun install`
+2. 初始化数据库（可重复执行以升级 schema）  
+   `bun run src/db/initDB.ts`
+3. 启动开发服务器（同时提供 REST API 与静态页面）  
+   `bun run dev`
+
+> 默认账号：`stu/stupass`、`tea/teapass`、`adm/admpass`（修改后请重新运行 `bun run src/db/initDB.ts` 以刷新种子数据）

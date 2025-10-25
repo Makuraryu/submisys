@@ -1,2 +1,6 @@
 .DS_Store
 AGENTS.md
+node_modules
+.env
+*.db
+data/
