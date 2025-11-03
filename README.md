@@ -40,6 +40,59 @@ project-manager/
 └── README.md
 ```
 
+## 数据库结构
+
+- 基础文件：`src/db/schema.sql:1` 定义全部表与约束；`src/db/initDB.ts:1` 负责读取并执行建表与种子数据。
+
+- 表：`users`
+  - 字段：`id INTEGER PK`、`username TEXT UNIQUE NOT NULL`、`password TEXT NOT NULL`、`role TEXT NOT NULL`（取值：`student|teacher|admin`）
+  - 约束：`username` 唯一；`role` 值受 `CHECK` 约束
+
+- 表：`defense_slots`
+  - 字段：`id INTEGER PK`、`slot_time TEXT NOT NULL`（ISO 字符串）、`location TEXT NOT NULL`、`status TEXT NOT NULL DEFAULT 'open'`
+  - 用途：管理员维护答辩时间与地点
+
+- 表：`projects`
+  - 字段：`id INTEGER PK`、`student_id INTEGER NOT NULL UNIQUE`、`title TEXT NOT NULL`、`description TEXT`、`defense_slot_id INTEGER`、`status TEXT NOT NULL DEFAULT 'pending'`
+  - 关联：`student_id -> users(id) ON DELETE CASCADE`、`defense_slot_id -> defense_slots(id)`
+  - 约束：每个学生仅允许一个项目（`student_id` 唯一）
+
+- 表：`teacher_assignments`
+  - 字段：`id INTEGER PK`、`teacher_id INTEGER NOT NULL`、`slot_id INTEGER NOT NULL`
+  - 关联：`teacher_id -> users(id) ON DELETE CASCADE`、`slot_id -> defense_slots(id) ON DELETE CASCADE`
+  - 约束：`UNIQUE(teacher_id, slot_id)`，同一教师在同一时间段只出现一次
+
+- 表：`scores`
+  - 字段：`id INTEGER PK`、`project_id INTEGER NOT NULL`、`teacher_id INTEGER NOT NULL`、`result TEXT NOT NULL`（取值：`pass|fail`）、`comments TEXT`、`updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`
+  - 关联：`project_id -> projects(id) ON DELETE CASCADE`、`teacher_id -> users(id) ON DELETE CASCADE`
+  - 约束：`UNIQUE(project_id, teacher_id)`，同一教师对同一项目仅打分一次
+
+- 关系概览
+  - 用户（学生）1 — 1 项目：`projects.student_id` 唯一
+  - 答辩时间段 1 — N 项目：`projects.defense_slot_id`
+  - 教师 N — N 时间段：经 `teacher_assignments(teacher_id, slot_id)` 中间表
+  - 项目 N — N 教师（打分维度）：经 `scores(project_id, teacher_id)` 中间表
+
+- 状态与枚举
+  - `users.role`：`student|teacher|admin`
+  - `scores.result`：`pass|fail`
+  - `defense_slots.status`：默认 `open`（可由管理员用于开放/关闭展示）
+  - `projects.status`：默认 `pending`（管理员审批流程可更新）
+
+- 唯一性与索引
+  - `users.username` 唯一
+  - `projects.student_id` 唯一（学生仅一条项目记录）
+  - 复合唯一：`teacher_assignments(teacher_id, slot_id)`、`scores(project_id, teacher_id)`
+
+- 级联删除策略（清理关联数据）
+  - 删除用户将级联删除其项目、打分、授课分配（学生/教师各自关联）
+  - 删除时间段将级联删除对应 `teacher_assignments` 记录
+
+- 种子数据（便于本地演示）
+  - 用户：`student1/stupass`、`teacher1/teapass`、`admin1/admpass`
+  - 时间段示例：`2025-10-26T09:00:00 BJ303`、`2025-10-26T10:30:00 C503`
+  - 教师分配：`teacher1` 关联上述两个时间段
+
 ## RoadMap
 
 - [x] 建立数据库 `initDB.ts`。  
